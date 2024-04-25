@@ -2,7 +2,7 @@
 
 # 环境配置
 
->**Note**: 完成 [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) 里的环境配置直到 "Creating a new application" 这一步之前
+>**Note**: 完成 [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) 里的环境配置直到 "Creating a new application" 这一步之前。
 
 ## Step 1: 启动 Metro Server
 
@@ -40,13 +40,40 @@ npm run ios
 yarn ios
 ```
 
+## Step 3: 更改 APP_ID 等为自己的应用信息
+
+### app.config.json
+```
+{
+    "APP_ID": "自己的APP_ID",
+    "APP_KEY": "自己的APP_KEY",
+    "SECRET": "自己的SECRET"
+}
+```
+
+### android / app / src / main / assets / auth.properties
+
+```
+# 在线Android SDK 鉴权信息
+## 1.修改这个文件4个鉴权信息
+## 2.修改app/build.gradle里 defaultConfig.applicationId为你网页上应用填写的android包名
+# 网页上应用的appId，申请纯离线SDK鉴权的必备信息
+appId:自己的APP_ID
+# 网页上应用的appKey, 在线模式和离在线混合模式需要。
+appKey:自己的APP_KEY
+# 网页上应用的secretKey, 在线模式和离在线混合模式需要。
+secretKey:自己的SECRET
+# 包名，这个值必须和app/build.gradle 里 defaultConfig.applicationId一致,即必须为context.getPackageName()
+applicationId:com.baiduasrrobot
+```
+
 # 相关技术文档
 
 To learn more about this project , take a look at the following resources:
 
 - [React Native Website](https://reactnative.dev) - React Native官方文档
 - [react-native-baidu-asr](https://github.com/gdoudeng/react-native-baidu-asr) - 提供了百度语音 SDK 的 React Native 接口
-- [wxyy_backend]() - 我自己搭的文心一言服务器
+- [wxyy_backend](https://github.com/SC-WSKun/wxyy_backend) - 我自己搭的文心一言服务器
 
 # 可能用到的开发工具
 

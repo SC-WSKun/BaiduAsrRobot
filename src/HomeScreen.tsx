@@ -12,6 +12,7 @@ import {
   IBaseData,
   WakeUpResultError,
 } from 'react-native-baidu-asr';
+import config from '../app.config.json';
 
 interface IProps {}
 
@@ -27,18 +28,14 @@ class HomeScreen extends Component<IProps, IState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      status: '☆唤醒词：小度你好 或者 百度一下☆',
+      status: '☆唤醒词：旺财旺财☆',
       results: [],
       isStart: false,
     };
   }
 
   componentDidMount() {
-    BaiduWakeUp.init({
-      APP_ID: '62220851',
-      APP_KEY: 'cg8mW1MEOmVxEq0TpqmNNWYW',
-      SECRET: 'kQUe8L4cLoHvDozB1CoCtDUonzRzWcHf',
-    });
+    BaiduWakeUp.init(config);
     this.resultListener = BaiduWakeUp.addResultListener(this.onWakeUpResult);
     this.errorListener = BaiduWakeUp.addErrorListener(this.onWakeUpError);
   }
