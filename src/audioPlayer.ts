@@ -1,5 +1,4 @@
 import TrackPlayer, {
-  AddTrack,
   AppKilledPlaybackBehavior,
   Capability,
   RepeatMode,
