@@ -13,6 +13,8 @@ import {
   WakeUpResultError,
 } from 'react-native-baidu-asr';
 import config from '../app.config.json';
+import TrackPlayer from 'react-native-track-player';
+import {setupPlayer, addTracks} from './audioPlayer';
 
 interface IProps {}
 
@@ -20,6 +22,7 @@ interface IState {
   status: string;
   results: string[];
   isStart: boolean;
+  isPlayerReady: boolean;
 }
 
 class HomeScreen extends Component<IProps, IState> {
@@ -31,13 +34,26 @@ class HomeScreen extends Component<IProps, IState> {
       status: '☆唤醒词：旺财旺财☆',
       results: [],
       isStart: false,
+      isPlayerReady: false,
     };
   }
 
   componentDidMount() {
+    const that = this;
     BaiduWakeUp.init(config);
     this.resultListener = BaiduWakeUp.addResultListener(this.onWakeUpResult);
     this.errorListener = BaiduWakeUp.addErrorListener(this.onWakeUpError);
+    async function setup() {
+      let isSetup = await setupPlayer();
+      const queue = await TrackPlayer.getQueue();
+      if (isSetup && queue.length <= 0) {
+        await addTracks();
+      }
+      that.setState({
+        isPlayerReady: isSetup,
+      });
+    }
+    setup();
   }
 
   componentWillUnmount() {
@@ -47,6 +63,11 @@ class HomeScreen extends Component<IProps, IState> {
   }
 
   onWakeUpResult = (data: IBaseData<string | undefined>) => {
+    console.log('唤醒结果 ', data);
+    if (this.state.isPlayerReady) {
+      TrackPlayer.skip(0);
+      TrackPlayer.play();
+    }
     this.setState(preState => {
       const newResults = preState.results;
       if (data.data) {
@@ -100,6 +121,13 @@ class HomeScreen extends Component<IProps, IState> {
             title={isStart ? '停止' : '开始'}
             onPress={this.handleAction}
           />
+          {/* <Button
+            title="播放"
+            onPress={() => {
+              TrackPlayer.skip(0);
+              TrackPlayer.play();
+            }}
+          /> */}
         </View>
       </View>
     );
