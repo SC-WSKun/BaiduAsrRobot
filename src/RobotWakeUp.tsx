@@ -8,6 +8,7 @@ import {
 import config from '../app.config.json';
 import TrackPlayer from 'react-native-track-player';
 import {setupPlayer, addTracks} from './audioPlayer';
+import { doRecognize } from './event';
 
 interface IProps {}
 
@@ -20,6 +21,7 @@ interface IState {
 class RobotWakeUp extends Component<IProps, IState> {
   resultListener: any;
   errorListener: any;
+  startRecognize: any;
   constructor(props: any) {
     super(props);
     this.state = {
@@ -64,6 +66,7 @@ class RobotWakeUp extends Component<IProps, IState> {
     if (this.state.isPlayerReady) {
       TrackPlayer.skip(0);
       TrackPlayer.play();
+      doRecognize();
     }
     this.setState({
       status: data.msg,

@@ -9,14 +9,7 @@
  */
 
 import React, {Component} from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-  ToastAndroid,
-  ScrollView,
-  Button,
-} from 'react-native';
+import {StyleSheet, Text, View, ToastAndroid} from 'react-native';
 import {
   BaiduAsr,
   StatusCode,
@@ -26,13 +19,15 @@ import {
   VolumeData,
 } from 'react-native-baidu-asr';
 import config from '../app.config.json';
+import {userAsk} from './hooks/hooks';
+import {addListenerRecognize} from './event';
 
 interface IProps {}
 
 interface IState {
-  status: string;
   speechRecognizerVolume: number;
-  results: string[];
+  userSpeech: string;
+  robotAnswer: string;
   isStart: boolean;
 }
 
@@ -43,9 +38,9 @@ export default class VoiceRecognization extends Component<IProps, IState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      status: '☆语音识别☆',
+      userSpeech: '☆语音识别☆',
+      robotAnswer: '',
       speechRecognizerVolume: 0,
-      results: [],
       isStart: false,
     };
   }
@@ -55,6 +50,7 @@ export default class VoiceRecognization extends Component<IProps, IState> {
     this.resultListener = BaiduAsr.addResultListener(this.onRecognizerResult);
     this.errorListener = BaiduAsr.addErrorListener(this.onRecognizerError);
     this.volumeListener = BaiduAsr.addAsrVolumeListener(this.onAsrVolume);
+    addListenerRecognize(this.startRecognize);
   }
 
   componentWillUnmount() {
@@ -64,35 +60,47 @@ export default class VoiceRecognization extends Component<IProps, IState> {
     BaiduAsr.release();
   }
 
-  onRecognizerResult = (data: IBaseData<RecognizerResultData | undefined>) => {
-    console.log('识别结果', data);
+  onRecognizerResult = async (
+    data: IBaseData<RecognizerResultData | undefined>,
+  ) => {
     if (
-      data.code === StatusCode.STATUS_SPEAKING ||
-      data.code === StatusCode.STATUS_FINISHED
+      data.code === StatusCode.STATUS_FINISHED ||
+      data.code === StatusCode.STATUS_LONG_SPEECH_FINISHED
     ) {
       if (data.data?.results_recognition?.length) {
         const result = data.data.results_recognition[0];
-        this.setState(preState => {
-          const newResults = preState.results;
-          newResults.push(result);
-          return {
-            results: newResults,
-            status: data.msg,
-          };
+        this.setState({
+          userSpeech: result,
         });
+        const answer = await userAsk(result);
+        this.setState({
+          robotAnswer: answer.result,
+          isStart: false,
+        });
+        BaiduAsr.cancel();
       }
-    } else if (data.code === StatusCode.STATUS_RECOGNITION) {
-      console.log('用户说话结束');
     }
   };
 
+  startRecognize = () => {
+    BaiduAsr.start({
+      VAD_ENDPOINT_TIMEOUT: 800,
+      // 禁用标点符号
+      DISABLE_PUNCTUATION: false,
+      PID: 15373,
+    });
+    this.setState({isStart: true});
+  };
+
   onRecognizerError = (data: IBaseData<RecognizerResultError>) => {
-    this.setState({status: data.msg});
+    this.setState({userSpeech: data.msg});
     ToastAndroid.show(
       `${data.msg}，错误码: 【${data.data.errorCode}, ${data.data.subErrorCode}】，${data.data.descMessage}`,
       ToastAndroid.LONG,
     );
     console.log('onRecognizerError ', JSON.stringify(data));
+    BaiduAsr.cancel();
+    this.setState({isStart: false});
   };
 
   /**
@@ -106,39 +114,16 @@ export default class VoiceRecognization extends Component<IProps, IState> {
     });
   };
 
-  handleAction = () => {
-    if (this.state.isStart) {
-      BaiduAsr.cancel();
-      this.setState({isStart: false});
-    } else {
-      BaiduAsr.start({
-        // 长语音
-        VAD_ENDPOINT_TIMEOUT: 0,
-        BDS_ASR_ENABLE_LONG_SPEECH: true,
-        // 禁用标点符号
-        DISABLE_PUNCTUATION: true,
-      });
-      this.setState({isStart: true});
-    }
-  };
-
   render() {
-    const {results, status, isStart, speechRecognizerVolume} = this.state;
+    const {userSpeech, robotAnswer, speechRecognizerVolume} = this.state;
     // 0,1,2,3 ...
     const speechRecognizerVolumeList = [
       ...Array(speechRecognizerVolume).keys(),
     ];
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>{status}</Text>
-
-        <ScrollView contentContainerStyle={styles.scrollViewContent}>
-          {results.map(result => (
-            <Text key={result + Math.random()} style={styles.resultText}>
-              {result}
-            </Text>
-          ))}
-        </ScrollView>
+        <Text style={styles.welcome}>{userSpeech}</Text>
+        <Text style={styles.welcome}>{robotAnswer}</Text>
 
         <View style={styles.bottomView}>
           {speechRecognizerVolumeList.reverse().map((value, index) => (
@@ -152,12 +137,6 @@ export default class VoiceRecognization extends Component<IProps, IState> {
               key={index}
             />
           ))}
-          <View style={[styles.ml3, styles.mr3]}>
-            <Button
-              title={isStart ? '结束' : '开始'}
-              onPress={this.handleAction}
-            />
-          </View>
           {speechRecognizerVolumeList.map((value, index) => (
             <View
               style={[

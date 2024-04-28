@@ -1,4 +1,4 @@
-import React, {Component} from 'react';
+import React, {Component, createRef} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {BaiduAsr} from 'react-native-baidu-asr';
 import config from '../app.config.json';
@@ -18,6 +18,8 @@ class HomeScreen extends Component<IProps, IState> {
   componentDidMount() {
     BaiduAsr.init(config);
   }
+
+  VoiceRecognizationRef: React.RefObject<VoiceRecognization> = createRef();
 
   componentWillUnmount() {}
 
