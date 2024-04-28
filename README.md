@@ -39,8 +39,9 @@ npm run ios
 # OR using Yarn
 yarn ios
 ```
+# 自定义修改
 
-## Step 3: 更改 APP_ID 等为自己的应用信息
+## 更改百度智能云应用信息
 
 ### app.config.json
 ```
@@ -58,14 +59,24 @@ yarn ios
 ## 1.修改这个文件4个鉴权信息
 ## 2.修改app/build.gradle里 defaultConfig.applicationId为你网页上应用填写的android包名
 # 网页上应用的appId，申请纯离线SDK鉴权的必备信息
-appId:自己的APP_ID
+appId:[自己的APP_ID]
 # 网页上应用的appKey, 在线模式和离在线混合模式需要。
-appKey:自己的APP_KEY
+appKey:[自己的APP_KEY]
 # 网页上应用的secretKey, 在线模式和离在线混合模式需要。
-secretKey:自己的SECRET
+secretKey:[自己的SECRET]
 # 包名，这个值必须和app/build.gradle 里 defaultConfig.applicationId一致,即必须为context.getPackageName()
-applicationId:com.baiduasrrobot
+applicationId:[自己的包名]
 ```
+
+## 更改唤醒词
+
+### Step 1: 获取唤醒词文件
+
+前往`https://ai.baidu.com/tech/speech/wake#tech-demo`生成自己想要的唤醒词文件`WakeUp.bin`
+
+### Step 2: 替换唤醒词文件
+
+唤醒词文件在`android / app / src / main / assets / WakeUp.bin`
 
 # 相关技术文档
 
