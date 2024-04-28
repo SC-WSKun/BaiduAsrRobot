@@ -18,9 +18,9 @@ import {
   RecognizerResultData,
   VolumeData,
 } from 'react-native-baidu-asr';
-import config from '../app.config.json';
-import {userAsk} from './hooks/hooks';
-import {addListenerRecognize} from './event';
+import config from '../../app.config.json';
+import {userAsk} from '../hooks/hooks';
+import {addListenerRecognize} from '../utils/event';
 
 interface IProps {}
 

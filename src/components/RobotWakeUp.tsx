@@ -5,10 +5,10 @@ import {
   IBaseData,
   WakeUpResultError,
 } from 'react-native-baidu-asr';
-import config from '../app.config.json';
+import config from '../../app.config.json';
 import TrackPlayer from 'react-native-track-player';
-import {setupPlayer, addTracks} from './audioPlayer';
-import { doRecognize } from './event';
+import {setupPlayer, addTracks} from '../utils/audioPlayer';
+import {doRecognize} from '../utils/event';
 
 interface IProps {}
 

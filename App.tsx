@@ -8,8 +8,8 @@
 import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
-import HomeScreen from './src/HomeScreen';
-import VoiceRecognization from './src/VoiceRecognization';
+import HomeScreen from './src/components/HomeScreen';
+import VoiceRecognization from './src/components/VoiceRecognization';
 
 const Stack = createNativeStackNavigator();
 

@@ -1,7 +1,7 @@
 import React, {Component, createRef} from 'react';
 import {StyleSheet, View} from 'react-native';
 import {BaiduAsr} from 'react-native-baidu-asr';
-import config from '../app.config.json';
+import config from '../../app.config.json';
 import RobotWakeUp from './RobotWakeUp';
 import VoiceRecognization from './VoiceRecognization';
 
