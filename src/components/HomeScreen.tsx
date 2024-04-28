@@ -1,9 +1,8 @@
-import React, {Component, createRef} from 'react';
-import {StyleSheet, View} from 'react-native';
-import {BaiduAsr} from 'react-native-baidu-asr';
-import config from '../../app.config.json';
+import React, {Component} from 'react';
+import {Button, StyleSheet, View} from 'react-native';
 import RobotWakeUp from './RobotWakeUp';
 import VoiceRecognization from './VoiceRecognization';
+import baiduAsrTTS from '../utils/BaiduAsrTTS';
 
 interface IProps {}
 
@@ -15,11 +14,7 @@ class HomeScreen extends Component<IProps, IState> {
     this.state = {};
   }
 
-  componentDidMount() {
-    BaiduAsr.init(config);
-  }
-
-  VoiceRecognizationRef: React.RefObject<VoiceRecognization> = createRef();
+  componentDidMount() {}
 
   componentWillUnmount() {}
 
@@ -28,7 +23,7 @@ class HomeScreen extends Component<IProps, IState> {
       <View style={styles.container}>
         <RobotWakeUp />
         <VoiceRecognization />
-
+        <Button title="speak" onPress={baiduAsrTTS.speak} />
         <View style={styles.bottomView} />
       </View>
     );

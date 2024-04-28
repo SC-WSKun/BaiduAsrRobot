@@ -13,7 +13,6 @@ import {doRecognize} from '../utils/event';
 interface IProps {}
 
 interface IState {
-  status: string;
   isStart: boolean;
   isPlayerReady: boolean;
 }
@@ -25,7 +24,6 @@ class RobotWakeUp extends Component<IProps, IState> {
   constructor(props: any) {
     super(props);
     this.state = {
-      status: '☆唤醒词：旺财旺财☆',
       isStart: false,
       isPlayerReady: false,
     };
@@ -33,9 +31,11 @@ class RobotWakeUp extends Component<IProps, IState> {
 
   componentDidMount() {
     const that = this;
+    //初始化百度语音唤醒
     BaiduWakeUp.init(config);
     this.resultListener = BaiduWakeUp.addResultListener(this.onWakeUpResult);
     this.errorListener = BaiduWakeUp.addErrorListener(this.onWakeUpError);
+    //初始化播放器
     async function setup() {
       let isSetup = await setupPlayer();
       const queue = await TrackPlayer.getQueue();
@@ -47,6 +47,7 @@ class RobotWakeUp extends Component<IProps, IState> {
       });
     }
     setup();
+    //启动唤醒服务
     setTimeout(() => {
       BaiduWakeUp.start({
         //表示WakeUp.bin文件定义在assets目录下
@@ -62,19 +63,15 @@ class RobotWakeUp extends Component<IProps, IState> {
     BaiduWakeUp.release();
   }
 
-  onWakeUpResult = (data: IBaseData<string | undefined>) => {
+  onWakeUpResult = () => {
     if (this.state.isPlayerReady) {
       TrackPlayer.skip(0);
       TrackPlayer.play();
       doRecognize();
     }
-    this.setState({
-      status: data.msg,
-    });
   };
 
   onWakeUpError = (data: IBaseData<WakeUpResultError>) => {
-    this.setState({status: data.msg});
     ToastAndroid.show(
       `${data.msg}，错误码: 【${data.data.errorCode}】，错误消息：${data.data.errorMessage}，原始返回：${data.data.result}`,
       ToastAndroid.LONG,
@@ -83,8 +80,7 @@ class RobotWakeUp extends Component<IProps, IState> {
   };
 
   render() {
-    const {status} = this.state;
-    return <Text style={styles.welcome}>{status}</Text>;
+    return <Text style={styles.welcome}>这里放旺财的图片</Text>;
   }
 }
 

@@ -41,7 +41,7 @@ export async function addTracks() {
   var tracks = [
     {
       id: '1',
-      url: require('./assets/IAmHere.mp3'),
+      url: require('../assets/IAmHere.mp3'),
       title: 'I Am Here',
       artist: 'WangCai',
       duration: 2,
