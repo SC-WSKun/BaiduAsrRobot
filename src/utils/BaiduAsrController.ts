@@ -1,4 +1,4 @@
-import {addRobotEventListener} from './event';
+import {addRobotEventListener} from './eventBus';
 import {userAsk} from '../hooks/hooks';
 import BaiduAsrTTS from './BaiduAsr/BaiduAsrTTS';
 import BaiduAsrWakeup from './BaiduAsr/BaiduAsrWakeup';
@@ -27,18 +27,18 @@ class BaiduAsrController {
     });
   }
 
-  async askRobot(question: string) {
+  askRobot = async (question: string) => {
     let {result} = await userAsk(question);
     if (result.length >= 60) {
       this.members.BaiduAsrTTS.speakLongText(result);
     } else {
       this.members.BaiduAsrTTS.speak(result);
     }
-  }
+  };
 
-  speakText(text: string) {
+  speakText = (text: string) => {
     this.members.BaiduAsrTTS.speak(text);
-  }
+  };
 }
 
 const baiduAsrController = new BaiduAsrController();

@@ -6,7 +6,7 @@ import {
 import config from '../../../app.config.json';
 import {addTracks, setupPlayer} from '../audioPlayer';
 import TrackPlayer from 'react-native-track-player';
-import {doRobotEvent} from '../event';
+import {doRobotEvent} from '../eventBus';
 import {ToastAndroid} from 'react-native';
 
 class BaiduAsrWakeup {

@@ -7,11 +7,11 @@ import {
   //   VolumeData,
 } from 'react-native-baidu-asr';
 import config from '../../../app.config.json';
-import {addRobotEventListener, doRobotEvent} from '../event';
+import {addRobotEventListener, doRobotEvent} from '../eventBus';
 import {ToastAndroid} from 'react-native';
 
 class BaiduAsrRecognization {
-  speechRecognizerVolume = 0;
+  //   speechRecognizerVolume = 0;
   resultListener: any;
   errorListener: any;
   volumeListener: any;
@@ -33,8 +33,13 @@ class BaiduAsrRecognization {
     BaiduAsr.release();
   }
 
+  /**
+   * 启动识别
+   */
   startRecognize = () => {
-    console.log('start recognize');
+    if (__DEV__) {
+      console.log('startRecognize');
+    }
     BaiduAsr.start({
       VAD_ENDPOINT_TIMEOUT: 800,
       // 禁用标点符号
@@ -43,6 +48,10 @@ class BaiduAsrRecognization {
     });
   };
 
+  /**
+   * 处理识别结果
+   * @param data
+   */
   onRecognizerResult = async (
     data: IBaseData<RecognizerResultData | undefined>,
   ) => {
@@ -62,6 +71,10 @@ class BaiduAsrRecognization {
     }
   };
 
+  /**
+   * 处理识别错误
+   * @param data
+   */
   onRecognizerError = (data: IBaseData<RecognizerResultError>) => {
     ToastAndroid.show(
       `${data.msg}，错误码: 【${data.data.errorCode}, ${data.data.subErrorCode}】，${data.data.descMessage}`,
