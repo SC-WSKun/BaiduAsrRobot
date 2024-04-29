@@ -37,6 +37,13 @@ class BaiduAsrTTS {
     });
   };
 
+  speakLongText = (text: string) => {
+    let textArray = text.split('。');
+    BaiduSynthesizer.batchSpeak(textArray, {PARAM_SPEAKER: '4'}, status => {
+      console.log('speakLongText --> ', status);
+    });
+  };
+
   unMount = () => {
     this.resultListener?.remove();
     this.errorListener?.remove();

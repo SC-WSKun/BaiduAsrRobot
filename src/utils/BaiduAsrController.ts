@@ -29,11 +29,15 @@ class BaiduAsrController {
 
   async askRobot(question: string) {
     let {result} = await userAsk(question);
-    try {
+    if (result.length >= 60) {
+      this.members.BaiduAsrTTS.speakLongText(result);
+    } else {
       this.members.BaiduAsrTTS.speak(result);
-    } catch (e) {
-      console.log(e);
     }
+  }
+
+  speakText(text: string) {
+    this.members.BaiduAsrTTS.speak(text);
   }
 }
 

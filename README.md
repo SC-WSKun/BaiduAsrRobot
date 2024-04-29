@@ -20,24 +20,8 @@ yarn start
 
 另起一个终端，在根目录下运行下面的指令
 
-### For Android
-
 ```bash
-# using npm
-npm run android
-
-# OR using Yarn
-yarn android
-```
-
-### For iOS
-
-```bash
-# using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
+npx expo run
 ```
 # 自定义修改
 
