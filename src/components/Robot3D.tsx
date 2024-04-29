@@ -1,5 +1,5 @@
 import React from 'react';
-import {View} from 'react-native';
+import {StyleSheet, View} from 'react-native';
 import {GLView} from 'expo-gl';
 import {
   Scene,
@@ -12,11 +12,8 @@ import {Renderer} from 'expo-three';
 
 export default function Robot3D() {
   return (
-    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-      <GLView
-        style={{width: 400, height: 400}}
-        onContextCreate={onContextCreate}
-      />
+    <View style={styles.container}>
+      <GLView style={styles.glView} onContextCreate={onContextCreate} />
     </View>
   );
 }
@@ -71,3 +68,15 @@ const onContextCreate = async (gl: any) => {
   // call render
   render();
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  glView: {
+    width: 400,
+    height: 400,
+  },
+});

@@ -9,10 +9,10 @@ class BaiduAsrController {
 
   constructor() {
     this.askRobot = this.askRobot.bind(this);
-    addRobotEventListener('askRobot', this.askRobot);
     this.members.BaiduAsrTTS = new BaiduAsrTTS();
     this.members.BaiduAsrWakeup = new BaiduAsrWakeup();
     this.members.BaiduAsrRecognization = new BaiduAsrRecognization();
+    addRobotEventListener('askRobot', this.askRobot);
   }
 
   setUp() {
