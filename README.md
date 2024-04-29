@@ -54,6 +54,8 @@ yarn ios
 
 ### android / app / src / main / assets / auth.properties
 
+此文件为百度语音合成服务鉴权文件，如果语音合成有问题可以排查下这里
+
 ```
 # 在线Android SDK 鉴权信息
 ## 1.修改这个文件4个鉴权信息

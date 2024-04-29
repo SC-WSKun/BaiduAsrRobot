@@ -6,13 +6,9 @@ import {
 } from 'react-native-baidu-asr';
 
 class BaiduAsrTTS {
-  text: string;
   resultListener: any;
   errorListener: any;
-  constructor() {
-    this.text = '你好';
-    this.setUp();
-  }
+  constructor() {}
 
   setUp() {
     BaiduSynthesizer.initialTts();
@@ -34,8 +30,9 @@ class BaiduAsrTTS {
     console.log('onSynthesizerError', data);
   };
 
-  speak = () => {
-    BaiduSynthesizer.speak(this.text, {PARAM_SPEAKER: '1'}, status => {
+  speak = (text: string) => {
+    console.log('speak --> ', text);
+    BaiduSynthesizer.speak(text, {PARAM_SPEAKER: '4'}, status => {
       console.log('speak --> ', status);
     });
   };
@@ -49,5 +46,4 @@ class BaiduAsrTTS {
   };
 }
 
-const baiduAsrTTS = new BaiduAsrTTS();
-export default baiduAsrTTS;
+export default BaiduAsrTTS;

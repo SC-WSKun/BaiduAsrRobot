@@ -6,12 +6,10 @@ import {EventEmitter} from 'events';
 
 const eventEmitter = new EventEmitter();
 
-const eventRecognize = 'startRecognize';
-
-export function addListenerRecognize(handler: any) {
-  eventEmitter.on(eventRecognize, handler);
+export function addRobotEventListener(eventName: string, handler: any) {
+  eventEmitter.on(eventName, handler);
 }
 
-export function doRecognize() {
-  eventEmitter.emit(eventRecognize);
+export function doRobotEvent(eventName: string, args: any) {
+  eventEmitter.emit(eventName, args);
 }

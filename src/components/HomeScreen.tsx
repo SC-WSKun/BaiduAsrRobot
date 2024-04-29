@@ -1,8 +1,6 @@
 import React, {Component} from 'react';
-import {Button, StyleSheet, View} from 'react-native';
-import RobotWakeUp from './RobotWakeUp';
-import VoiceRecognization from './VoiceRecognization';
-import baiduAsrTTS from '../utils/BaiduAsrTTS';
+import {StyleSheet, View} from 'react-native';
+import baiduAsrController from '../utils/BaiduAsrController';
 
 interface IProps {}
 
@@ -14,16 +12,17 @@ class HomeScreen extends Component<IProps, IState> {
     this.state = {};
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    baiduAsrController.setUp();
+  }
 
-  componentWillUnmount() {}
+  componentWillUnmount() {
+    baiduAsrController.unMount();
+  }
 
   render() {
     return (
       <View style={styles.container}>
-        <RobotWakeUp />
-        <VoiceRecognization />
-        <Button title="speak" onPress={baiduAsrTTS.speak} />
         <View style={styles.bottomView} />
       </View>
     );
