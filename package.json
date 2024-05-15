@@ -10,13 +10,18 @@
     "test": "jest"
   },
   "dependencies": {
+    "@pmndrs/assets": "^1.6.0",
     "@react-navigation/native": "^6.1.17",
     "@react-navigation/native-stack": "^6.9.26",
+    "@react-three/drei": "^9.105.5",
+    "@react-three/fiber": "^8.16.2",
     "events": "^3.3.0",
     "expo": "^50.0.0",
+    "expo-asset": "~9.0.2",
     "expo-constants": "~15.4.6",
     "expo-gl": "~13.6.0",
     "expo-three": "^7.0.0",
+    "r3f-native-orbitcontrols": "^1.0.12",
     "react": "18.2.0",
     "react-native": "0.73.6",
     "react-native-baidu-asr": "^1.4.0",

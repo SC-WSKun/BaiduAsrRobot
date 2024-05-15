@@ -71,6 +71,8 @@ To learn more about this project , take a look at the following resources:
 - [React Native Website](https://reactnative.dev) - React Native官方文档
 - [react-native-baidu-asr](https://github.com/gdoudeng/react-native-baidu-asr) - 提供了百度语音 SDK 的 React Native 接口
 - [wxyy_backend](https://github.com/SC-WSKun/wxyy_backend) - 我自己搭的文心一言服务器
+- [react-three-fiber](https://github.com/pmndrs/react-three-fiber) - 提供 Three.js 的 React 版本(部分兼容React Native)
+- [r3f-native-orbitcontrols](https://github.com/TiagoCavalcante/r3f-native-orbitcontrols/tree/main) - 提供 R3F 的 React Native 版本 OrbitControls
 
 # 可能用到的开发工具
 

@@ -25,7 +25,6 @@ class HomeScreen extends Component<IProps, IState> {
     return (
       <View style={styles.container}>
         <Robot3D />
-        <View style={styles.bottomView} />
       </View>
     );
   }
