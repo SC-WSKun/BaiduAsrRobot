@@ -4,6 +4,19 @@
 
 >**Note**: 完成 [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) 里的环境配置直到 "Creating a new application" 这一步之前。
 
+## Step 0: 完成WebSocket适配
+
+本项目使用[foxglove/ws-protocol](https://github.com/foxglove/ws-protocol/tree/main/typescript/ws-protocol)与机器人进行通信，由于React Native的WebSocket和Web的WebSocket封装上有区别，需要在`node_module/react-native/Library/LogBox/LogBox.js`中添加下面的代码：
+```typescript
+const TextEncodingPolyfill = require('text-encoding');
+const BigInt = require('big-integer');
+Object.assign(global,{
+  TextEncoder: TextEncodingPolyfill.TextEncoder,
+  TextDecoder: TextEncodingPolyfill.TextDecoder,
+  BigInt: BigInt,
+})
+```
+
 ## Step 1: 启动 Metro Server
 
 在根目录下运行下面的指令
@@ -28,7 +41,7 @@ npx expo run
 ## 更改百度智能云应用信息
 
 ### app.config.json
-```
+```json
 {
     "APP_ID": "自己的APP_ID",
     "APP_KEY": "自己的APP_KEY",

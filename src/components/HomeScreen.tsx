@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {StyleSheet, View} from 'react-native';
 import baiduAsrController from '../utils/BaiduAsrController';
 import Robot3D from './Robot3D';
+import RobotContact from './RobotContact';
 
 interface IProps {}
 
@@ -25,6 +26,7 @@ class HomeScreen extends Component<IProps, IState> {
     return (
       <View style={styles.container}>
         <Robot3D />
+        <RobotContact />
       </View>
     );
   }
