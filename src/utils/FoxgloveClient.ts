@@ -80,6 +80,7 @@ export function useFoxgloveClient() {
       }
     });
     setClient(newClient);
+    console.log('client initialized');
   }
 
   /**
