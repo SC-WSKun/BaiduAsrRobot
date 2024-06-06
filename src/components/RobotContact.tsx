@@ -2,6 +2,7 @@ import {Button, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import HocComponent from './HocComponent';
 import baiduAsrController from '../utils/BaiduAsrController';
+import type {MessageData} from '@foxglove/ws-protocol';
 
 interface IProps {
   foxgloveClient: any;
@@ -10,15 +11,56 @@ interface IProps {
 function RobotContact(props: IProps) {
   const {foxgloveClient, ws} = props;
   const [channelId, setChannelId] = useState<number | undefined>(-1);
+  const [tfSubId, setTfSubId] = useState<number | undefined>(-1);
+  const carPositionListener = ({
+    op,
+    subscriptionId,
+    timestamp,
+    data,
+  }: MessageData) => {
+    if (subscriptionId === tfSubId) {
+      const parseData = foxgloveClient.readMsgWithSubId(subscriptionId, data);
+      // if (
+      //   parseData.transforms.find(
+      //     (transform: any) =>
+      //       (transform.child_frame_id === 'base_footprint' &&
+      //         transform.header.frame_id === 'odom') ||
+      //       (transform.child_frame_id === 'odom' &&
+      //         transform.header.frame_id === 'map'),
+      //   )
+      // ) {
+      //   this.odomToBaseFootprint =
+      //     parseData.transforms.find(
+      //       (transform: any) =>
+      //         transform.child_frame_id === 'base_footprint' &&
+      //         transform.header.frame_id === 'odom',
+      //     )?.transform || this.odomToBaseFootprint;
+      //   this.mapToOdom =
+      //     parseData.transforms.find(
+      //       (transform: any) =>
+      //         transform.child_frame_id === 'odom' &&
+      //         transform.header.frame_id === 'map',
+      //     )?.transform || this.mapToOdom;
+      //   this.carPose = mapToBaseFootprint(
+      //     this.mapToOdom,
+      //     this.odomToBaseFootprint,
+      //   );
+      //   this.updateCarPose();
+      // }
+    }
+  };
+
   useEffect(() => {
     console.log('ws.readyState:', ws.readyState);
     if (ws.readyState === 1) {
       setMoveTopic();
-      // subscribeTfTopic();
+      subscribeTfTopic();
     } else {
       ws.onopen = () => {
         setMoveTopic();
-        // subscribeTfTopic();
+        setTimeout(() => {
+          subscribeTfTopic();
+        }, 2000);
       };
     }
     return () => {
@@ -39,10 +81,18 @@ function RobotContact(props: IProps) {
     baiduAsrController.setAction('move', handleMove(temp_channelId));
   };
 
-  // const subscribeTfTopic = async () => {
-  //   const temp_channelId = await foxgloveClient.subscribeTopic('tf');
-  //   console.log('temp_channelId:', temp_channelId);
-  // };
+  const subscribeTfTopic = () => {
+    console.log('subscribeTfTopic');
+    foxgloveClient
+      .subscribeTopic('/tf')
+      .then((subId: number) => {
+        setTfSubId(subId);
+      })
+      .catch((err: any) => {
+        console.log('err:', err);
+      });
+    foxgloveClient.listenMessage(carPositionListener);
+  };
 
   const handleMove = (channel: number | undefined) => {
     return ({
