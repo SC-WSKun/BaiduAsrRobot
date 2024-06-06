@@ -1,4 +1,3 @@
-import {useState, useMemo} from 'react';
 import _ from 'lodash';
 import {
   FoxgloveClient,
@@ -9,7 +8,6 @@ import {
 } from '@foxglove/ws-protocol';
 import {MessageWriter, MessageReader} from '@foxglove/rosmsg2-serialization';
 import {parse as parseMessageDefinition} from '@foxglove/rosmsg';
-import {concatenateUint8Arrays} from './util';
 
 type Sub = {
   subId: number;
@@ -17,15 +15,13 @@ type Sub = {
 };
 
 export function useFoxgloveClient() {
-  const [client, setClient] = useState<FoxgloveClient | null>(null);
-  const [channels, setChannels] = useState<Map<number, Channel>>(new Map());
-  const [services, setServices] = useState<Service[]>([]);
-  const [subs, setSubs] = useState<Sub[]>([]);
-  const [advertisedChannels, setAdvertisedChannels] = useState<any[]>([]);
-  const [msgEncoding, setMsgEncoding] = useState<string>('cdr');
-  const [callServiceId, setCallServiceId] = useState<number>(0);
-  const [jsonData, setJsonData] = useState<string>('');
-  const [binaryData, setBinaryData] = useState<Uint8Array>(new Uint8Array());
+  let client: FoxgloveClient | null = null;
+  let channels: Map<number, Channel> = new Map();
+  let services: Service[] = [];
+  let subs: Sub[] = [];
+  let advertisedChannels: any[] = [];
+  let msgEncoding = 'cdr';
+  let callServiceId = 0;
 
   const foxgloveClientConnected = () => {
     return client !== null;
@@ -37,49 +33,38 @@ export function useFoxgloveClient() {
     if (socket.onmessage) {
       console.log('onmessage exists');
     }
-    let newClient = new FoxgloveClient({
+    client = new FoxgloveClient({
       ws: socket,
     });
-    newClient.on('advertise', (rx_channels: Channel[]) => {
-      setChannels(prevChannels => {
-        const newChannels = new Map(prevChannels);
-        rx_channels.forEach((channel: Channel) => {
-          newChannels.set(channel.id, channel);
-        });
-        return newChannels;
+    client.on('advertise', (rx_channels: Channel[]) => {
+      rx_channels.forEach((channel: Channel) => {
+        channels.set(channel.id, channel);
       });
       console.log('current channels:', channels);
     });
-    newClient.on('unadvertise', (channelIds: number[]) => {
-      setChannels(prevChannels => {
-        const newChannels = new Map(prevChannels);
-        channelIds.forEach((id: number) => {
-          newChannels.delete(id);
-        });
-        return newChannels;
+    client.on('unadvertise', (channelIds: number[]) => {
+      channelIds.forEach((id: number) => {
+        channels.delete(id);
       });
       console.log('current', channels);
     });
-    newClient.on('advertiseServices', (rx_services: Service[]) => {
-      setServices(preServices => {
-        return preServices.concat(rx_services);
-      });
+    client.on('advertiseServices', (rx_services: Service[]) => {
+      services = services.concat(rx_services);
     });
-    newClient.on('open', () => {
+    client.on('open', () => {
       console.log('Connected to Foxglove server!');
     });
-    newClient.on('error', e => {
+    client.on('error', e => {
       console.error(e);
     });
-    newClient.on('close', () => {
+    client.on('close', () => {
       console.log('Disconnected from Foxglove server!');
     });
-    newClient.on('serverInfo', (serverInfo: ServerInfo) => {
+    client.on('serverInfo', (serverInfo: ServerInfo) => {
       if (serverInfo.supportedEncodings) {
-        setMsgEncoding(serverInfo.supportedEncodings[0]);
+        msgEncoding = serverInfo.supportedEncodings[0];
       }
     });
-    setClient(newClient);
     console.log('client initialized');
   }
 
@@ -97,7 +82,7 @@ export function useFoxgloveClient() {
         client?.unsubscribe(sub.subId);
       });
       client.close();
-      setClient(null);
+      client = null;
     }
     console.log('client closed');
   }
@@ -116,9 +101,7 @@ export function useFoxgloveClient() {
       return Promise.reject('Channel not found');
     }
     const subId = client.subscribe(channel.id);
-    setSubs((prevSubs: Sub[]) => {
-      return prevSubs.concat({subId, channelId: channel.id});
-    });
+    subs.push({subId, channelId: channel.id});
     return Promise.resolve(subId);
   }
 
@@ -133,9 +116,7 @@ export function useFoxgloveClient() {
       return;
     }
     // remove from subs list
-    setSubs((prevSubs: Sub[]) => {
-      return _.reject(prevSubs, {subId});
-    });
+    subs = _.reject(subs, {subId});
     client.unsubscribe(subId);
   }
 
@@ -193,7 +174,7 @@ export function useFoxgloveClient() {
       encoding: msgEncoding,
       data: new DataView(uint8Array.buffer),
     });
-    setCallServiceId(callServiceId + 1);
+    callServiceId = callServiceId + 1;
     return new Promise(resolve => {
       // 将监听回调函数抽离的目的是避免监听未及时off造成的内存泄漏
       function serviceResponseHandler(response: any) {
@@ -244,9 +225,7 @@ export function useFoxgloveClient() {
       return;
     }
     // remove from advertised channels list
-    setAdvertisedChannels((prevChannels: any[]) => {
-      return _.reject(prevChannels, {id: channelId});
-    });
+    advertisedChannels = _.reject(advertisedChannels, {id: channelId});
     client.unadvertise(channelId);
   }
 

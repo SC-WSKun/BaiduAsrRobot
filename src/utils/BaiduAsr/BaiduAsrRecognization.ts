@@ -59,6 +59,7 @@ class BaiduAsrRecognization {
       data.code === StatusCode.STATUS_FINISHED ||
       data.code === StatusCode.STATUS_LONG_SPEECH_FINISHED
     ) {
+      console.log('data:', data);
       if (data.data?.results_recognition?.length) {
         const result = data.data.results_recognition[0];
         if (__DEV__) {

@@ -45,7 +45,9 @@ class BaiduAsrWakeup {
     if (this.isPlayerReady) {
       TrackPlayer.skip(0);
       TrackPlayer.play();
-      doRobotEvent('startRecognize', undefined);
+      setTimeout(() => {
+        doRobotEvent('startRecognize', undefined);
+      }, 1000);
     }
   };
 
