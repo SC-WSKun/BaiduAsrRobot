@@ -12,42 +12,42 @@ function RobotContact(props: IProps) {
   const {foxgloveClient, ws} = props;
   const [channelId, setChannelId] = useState<number | undefined>(-1);
   const [tfSubId, setTfSubId] = useState<number | undefined>(-1);
-  const carPositionListener = ({
-    op,
-    subscriptionId,
-    timestamp,
-    data,
-  }: MessageData) => {
-    if (subscriptionId === tfSubId) {
-      const parseData = foxgloveClient.readMsgWithSubId(subscriptionId, data);
-      // if (
-      //   parseData.transforms.find(
-      //     (transform: any) =>
-      //       (transform.child_frame_id === 'base_footprint' &&
-      //         transform.header.frame_id === 'odom') ||
-      //       (transform.child_frame_id === 'odom' &&
-      //         transform.header.frame_id === 'map'),
-      //   )
-      // ) {
-      //   this.odomToBaseFootprint =
-      //     parseData.transforms.find(
-      //       (transform: any) =>
-      //         transform.child_frame_id === 'base_footprint' &&
-      //         transform.header.frame_id === 'odom',
-      //     )?.transform || this.odomToBaseFootprint;
-      //   this.mapToOdom =
-      //     parseData.transforms.find(
-      //       (transform: any) =>
-      //         transform.child_frame_id === 'odom' &&
-      //         transform.header.frame_id === 'map',
-      //     )?.transform || this.mapToOdom;
-      //   this.carPose = mapToBaseFootprint(
-      //     this.mapToOdom,
-      //     this.odomToBaseFootprint,
-      //   );
-      //   this.updateCarPose();
-      // }
-    }
+  const carPositionListener = (tfSubId: number | undefined) => {
+    return ({op, subscriptionId, timestamp, data}: MessageData) => {
+      if (subscriptionId === tfSubId) {
+        const parseData = foxgloveClient.readMsgWithSubId(subscriptionId, data);
+        // console.log('parseData:', parseData);
+        if (
+          parseData.transforms.find(
+            (transform: any) =>
+              (transform.child_frame_id === 'base_footprint' &&
+                transform.header.frame_id === 'odom') ||
+              (transform.child_frame_id === 'odom' &&
+                transform.header.frame_id === 'map'),
+          )
+        ) {
+          // this.odomToBaseFootprint =
+          let temp_Footprint = parseData.transforms.find(
+            (transform: any) =>
+              transform.child_frame_id === 'base_footprint' &&
+              transform.header.frame_id === 'odom',
+          )?.transform;
+          // || this.odomToBaseFootprint;
+          console.log(temp_Footprint);
+          // this.mapToOdom =
+          //   parseData.transforms.find(
+          //     (transform: any) =>
+          //       transform.child_frame_id === 'odom' &&
+          //       transform.header.frame_id === 'map',
+          //   )?.transform || this.mapToOdom;
+          // this.carPose = mapToBaseFootprint(
+          //   this.mapToOdom,
+          //   this.odomToBaseFootprint,
+          // );
+          // this.updateCarPose();
+        }
+      }
+    };
   };
 
   useEffect(() => {
@@ -86,12 +86,13 @@ function RobotContact(props: IProps) {
     foxgloveClient
       .subscribeTopic('/tf')
       .then((subId: number) => {
+        console.log(subId);
+        foxgloveClient.listenMessage(carPositionListener(subId));
         setTfSubId(subId);
       })
       .catch((err: any) => {
         console.log('err:', err);
       });
-    foxgloveClient.listenMessage(carPositionListener);
   };
 
   const handleMove = (channel: number | undefined) => {
