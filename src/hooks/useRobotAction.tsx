@@ -1,6 +1,7 @@
 import {MessageData} from '@foxglove/ws-protocol';
-import type {Move} from '../typings/component';
+import type {Move, Position} from '../typings/component';
 import baiduAsrController from '../utils/BaiduAsrController';
+import {quaternionToEuler} from '../utils/util';
 
 export function useRobotAction(foxgloveClient: any) {
   const channels = new Map();
@@ -30,7 +31,11 @@ export function useRobotAction(foxgloveClient: any) {
           )?.transform || odomToBaseFootprint;
         if (msgLimit) {
           msgLimit = false;
-          console.log('odomToBaseFootprint:', odomToBaseFootprint);
+          console.log(
+            'odomToBaseFootprint:',
+            // odomToBaseFootprint,
+            quaternionToEuler(odomToBaseFootprint.rotation),
+          );
           setTimeout(() => {
             msgLimit = true;
           }, 1000);
@@ -61,6 +66,46 @@ export function useRobotAction(foxgloveClient: any) {
       linear: {x: 0.0, y: 0.0, z: 0.0},
       angular: {x: 0.0, y: 0.0, z: 0.0},
     });
+  };
+
+  const moveToPostion = (position: Position) => {
+    const {angular, linear} = position;
+    function normalizeAngle(angle: number) {
+      return Math.atan2(Math.sin(angle), Math.cos(angle));
+    }
+    const startPose = normalizeAngle(
+      quaternionToEuler(odomToBaseFootprint.rotation)[2],
+    );
+    const reg = (2 * Math.PI) / 360;
+
+    function checkPosition() {
+      const currentPose = normalizeAngle(
+        quaternionToEuler(odomToBaseFootprint.rotation)[2],
+      );
+      const delta = normalizeAngle(currentPose - startPose);
+      const tolerance = 0.2;
+      console.log(Math.abs(delta - angular * reg));
+      if (Math.abs(delta - angular * reg) > tolerance) {
+        console.log('send move message');
+        foxgloveClient.publishMessage(channels.get('move'), {
+          linear: {x: 0.0, y: 0.0, z: 0.0},
+          angular: {x: 0.0, y: 0.0, z: 0.5},
+        });
+        return false;
+      } else {
+        return true;
+      }
+    }
+    function loop() {
+      setTimeout(() => {
+        if (!checkPosition()) {
+          loop();
+        } else {
+          console.log('到达目标位置');
+        }
+      }, 250);
+    }
+    loop();
   };
 
   const subscribeTfTopic = () => {
@@ -95,6 +140,7 @@ export function useRobotAction(foxgloveClient: any) {
   return {
     startMoving,
     stopMoving,
+    moveToPostion,
     subscribeTfTopic,
     publicMoveTopic,
     unmountAction,

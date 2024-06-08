@@ -27,9 +27,9 @@ class MainApplication : Application(), ReactApplication {
 
         override fun getJSMainModuleName(): String = "index"
 
-        override fun getJSBundleFile(): String? {
-          return "http://localhost:8082/index.bundle?platform=android"
-        }
+        // override fun getJSBundleFile(): String? {
+        //   return "http://localhost:8082/index.bundle?platform=android"
+        // }
 
         override fun getUseDeveloperSupport(): Boolean = BuildConfig.DEBUG
 

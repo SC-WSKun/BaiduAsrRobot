@@ -4,9 +4,9 @@
 
 >**Note**: 完成 [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) 里的环境配置直到 "Creating a new application" 这一步之前。
 
-## Step 0: 完成WebSocket适配
+## Step 0: 完成Three适配
 
-本项目使用[foxglove/ws-protocol](https://github.com/foxglove/ws-protocol/tree/main/typescript/ws-protocol)与机器人进行通信，由于React Native的WebSocket和Web的WebSocket封装上有区别，需要在`node_module/react-native/Library/LogBox/LogBox.js`中添加下面的代码：
+本项目使用[react-three-fiber](https://github.com/pmndrs/react-three-fiber)渲染3D模型，由于里面使用了WebAPI，会导致启动时报错`TextDecoder doesn't exist`等错误，所以需要在`node_module/react-native/Library/LogBox/LogBox.js`中添加下面的代码：
 ```typescript
 const TextEncodingPolyfill = require('text-encoding');
 const BigInt = require('big-integer');
@@ -34,7 +34,7 @@ yarn start
 另起一个终端，在根目录下运行下面的指令
 
 ```bash
-npx expo run
+npm run android
 ```
 # 自定义修改
 

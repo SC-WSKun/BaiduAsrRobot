@@ -11,6 +11,7 @@ function RobotContact(props: IProps) {
   const {foxgloveClient, ws} = props;
   const {
     startMoving,
+    moveToPostion,
     stopMoving,
     subscribeTfTopic,
     publicMoveTopic,
@@ -39,7 +40,7 @@ function RobotContact(props: IProps) {
     <View>
       <Button
         title="start"
-        onPress={() => startMoving({angularSpeed: 0.5, linearSpeed: 0.5})}
+        onPress={() => moveToPostion({angular: 0, linear: 0.5})}
       />
     </View>
   );
