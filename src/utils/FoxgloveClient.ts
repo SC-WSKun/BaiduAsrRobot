@@ -14,7 +14,7 @@ type Sub = {
   channelId: number;
 };
 
-export function useFoxgloveClient() {
+export function myFoxgloveClient() {
   let client: FoxgloveClient | null = null;
   let channels: Map<number, Channel> = new Map();
   let services: Service[] = [];
