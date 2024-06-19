@@ -2,6 +2,7 @@ import {Button, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import HocComponent from './HocComponent';
 import {useRobotAction} from '../hooks/useRobotAction';
+import baiduAsrController from '../utils/BaiduAsrController';
 
 interface IProps {
   foxgloveClient: any;
@@ -38,9 +39,17 @@ function RobotContact(props: IProps) {
 
   return (
     <View>
+      {/* <Button
+        title="move"
+        onPress={() => moveToPostion({angular: 90, linear: 0.5})}
+      /> */}
       <Button
-        title="start"
-        onPress={() => moveToPostion({angular: 0, linear: 0.5})}
+        title="communicate mode"
+        onPress={() => baiduAsrController.changeMode("normal")}
+      />
+      <Button
+        title="move mode"
+        onPress={() => baiduAsrController.changeMode("direction")}
       />
     </View>
   );

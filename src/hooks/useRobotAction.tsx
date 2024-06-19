@@ -1,5 +1,5 @@
 import {MessageData} from '@foxglove/ws-protocol';
-import type {Move, Position} from '../typings/component';
+import type {Move, Position, TargetPosition} from '../typings/component';
 import baiduAsrController from '../utils/BaiduAsrController';
 import {quaternionToEuler} from '../utils/util';
 
@@ -31,11 +31,7 @@ export function useRobotAction(foxgloveClient: any) {
           )?.transform || odomToBaseFootprint;
         if (msgLimit) {
           msgLimit = false;
-          console.log(
-            'odomToBaseFootprint:',
-            // odomToBaseFootprint,
-            quaternionToEuler(odomToBaseFootprint.rotation),
-          );
+          console.log('odomToBaseFootprint:', odomToBaseFootprint);
           setTimeout(() => {
             msgLimit = true;
           }, 1000);
@@ -68,11 +64,25 @@ export function useRobotAction(foxgloveClient: any) {
     });
   };
 
-  const moveToPostion = (position: Position) => {
-    const {angular, linear} = position;
+  const moveToAngular = (angular: number) => {
+    if (angular === 0) {
+      return Promise.resolve(true);
+    }
+
+    let angularSpeed = 0;
+
+    if (angular < 0) {
+      angularSpeed = -0.5;
+    } else {
+      angularSpeed = 0.5;
+    }
+
+    // 角度规范化，跨界处理
     function normalizeAngle(angle: number) {
       return Math.atan2(Math.sin(angle), Math.cos(angle));
     }
+
+    // 四元数转欧拉角，计算出起始偏航角
     const startPose = normalizeAngle(
       quaternionToEuler(odomToBaseFootprint.rotation)[2],
     );
@@ -89,23 +99,85 @@ export function useRobotAction(foxgloveClient: any) {
         console.log('send move message');
         foxgloveClient.publishMessage(channels.get('move'), {
           linear: {x: 0.0, y: 0.0, z: 0.0},
-          angular: {x: 0.0, y: 0.0, z: 0.5},
+          angular: {x: 0.0, y: 0.0, z: angularSpeed},
         });
         return false;
       } else {
         return true;
       }
     }
-    function loop() {
-      setTimeout(() => {
-        if (!checkPosition()) {
-          loop();
-        } else {
-          console.log('到达目标位置');
-        }
-      }, 250);
+    return new Promise((resolve, reject) => {
+      function loop() {
+        setTimeout(() => {
+          if (!checkPosition()) {
+            loop();
+          } else {
+            console.log('到达目标位置');
+            stopMoving();
+            resolve(true);
+          }
+        }, 250);
+      }
+      loop();
+    });
+  };
+
+  const moveToLinear = (linear: number) => {
+    if (linear === 0) {
+      return Promise.resolve(true);
     }
-    loop();
+
+    // 计算欧几里得距离
+    function calculateDistance(start: Position, current: Position): number {
+      const dx = current.x - start.x;
+      const dy = current.y - start.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    const startPosition = odomToBaseFootprint.translation;
+
+    function checkPosition() {
+      const currentPostion = odomToBaseFootprint.translation;
+      const distance = calculateDistance(startPosition, currentPostion);
+      const tolerance = 0.1;
+      console.log(distance);
+      if (distance < linear) {
+        foxgloveClient.publishMessage(channels.get('move'), {
+          linear: {x: 0.3, y: 0.0, z: 0.0},
+          angular: {x: 0.0, y: 0.0, z: 0.0},
+        });
+        return false;
+      } else {
+        return true;
+      }
+    }
+
+    return new Promise((resolve, reject) => {
+      function loop() {
+        setTimeout(() => {
+          if (!checkPosition()) {
+            loop();
+          } else {
+            console.log('到达目标位置');
+            stopMoving();
+            resolve(true);
+          }
+        }, 250);
+      }
+      loop();
+    });
+  };
+
+  const moveToPostion = (position: TargetPosition) => {
+    if (position === null) {
+      console.log('position param is null');
+    }
+    const {angular, linear} = position;
+    moveToAngular(angular).then(() => {
+      setTimeout(() => {
+        moveToLinear(linear);
+      }, 1500);
+    });
   };
 
   const subscribeTfTopic = () => {
@@ -131,7 +203,7 @@ export function useRobotAction(foxgloveClient: any) {
       topic: '/cmd_vel',
     });
     channels.set('move', temp_channelId);
-    baiduAsrController.setAction('move', startMoving);
+    baiduAsrController.setAction('move', moveToPostion);
   };
 
   const unmountAction = () => {

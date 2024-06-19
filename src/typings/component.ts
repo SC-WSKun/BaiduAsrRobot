@@ -3,9 +3,15 @@ export type Move = {
   linearSpeed: number;
 };
 
-export type Position = {
+export type TargetPosition = {
   angular: number;
   linear: number;
+};
+
+export type Position = {
+  x: number;
+  y: number;
+  z: number;
 };
 
 export type Quaternion = {
