@@ -2,9 +2,11 @@
 
 # 环境配置
 
+## 完成React Native 基础环境配置
+
 >**Note**: 完成 [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) 里的环境配置直到 "Creating a new application" 这一步之前。
 
-## Step 0: 完成Three适配
+## ~~完成Three适配~~（已使用Polyfill适配，无需再修改）
 
 本项目使用[react-three-fiber](https://github.com/pmndrs/react-three-fiber)渲染3D模型，由于里面使用了WebAPI，会导致启动时报错`TextDecoder doesn't exist`等错误，所以需要在`node_module/react-native/Library/LogBox/LogBox.js`中添加下面的代码：
 ```typescript
@@ -17,6 +19,14 @@ Object.assign(global,{
 })
 ```
 
+## 修改 react-native-polyfill-globals 中错误的引用
+1. 找到 `node_modules/react-native-polyfill-globals/src/readable-stream.js`
+2. 把 ReadableStream 引用的包更改为下面的代码
+    ```js
+    const { ReadableStream } = require('web-streams-polyfill');
+    ```
+
+# 调试应用
 ## Step 1: 启动 Metro Server
 
 在根目录下运行下面的指令
@@ -36,6 +46,27 @@ yarn start
 ```bash
 npm run android
 ```
+
+# 打包应用（安卓）
+
+## Step 1: 清空缓存
+在根目录下执行下列指令：
+```bash
+# 进入安卓目录
+cd android 
+# 清空缓存
+./gradlew clean
+```
+
+## Step 2: 打包应用
+```bash
+# 打包 apk
+./gradlew assembleRelease
+# 打包 aab(Google Play)
+./gradlew bundleRelease
+```
+
+
 # 自定义修改
 
 ## 更改百度智能云应用信息

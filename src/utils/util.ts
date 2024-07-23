@@ -21,9 +21,11 @@ export function decodeRobotAnswer(type: string) {
         try {
           const actionParam_str = msg_split[1].match(/```json([\s\S]*?)```/);
           if (actionParam_str === null) {
-            throw new Error('找不到```json');
+            actionParam = JSON.parse(msg_split[1]);
+            // throw new Error('找不到```json');
+          } else {
+            actionParam = JSON.parse(actionParam_str[1]);
           }
-          actionParam = JSON.parse(actionParam_str[1]);
           console.log('move:', actionParam);
         } catch (e) {
           console.log('JSON parse error:', e);

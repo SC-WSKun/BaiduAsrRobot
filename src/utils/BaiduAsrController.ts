@@ -35,18 +35,21 @@ class BaiduAsrController {
   };
 
   changeMode = (mode: string) => {
-    console.log('changeMode:', mode)
+    console.log('changeMode:', mode);
     this.mode = mode;
   };
 
   askRobot = async (question: string) => {
-    console.log('askQuestion:', question);
     let result;
     if (this.mode === 'direction') {
+      console.log('ask direction Question:', question);
       let res = await directionAsk(question);
+      console.log("res: ", res)
       result = res.result;
     } else if (this.mode === 'normal') {
+      console.log('ask communicate Question:', question);
       let res = await communicateAsk(question);
+      console.log("res: ", res)
       result = res.result;
     }
     console.log('robotAnswer:', result);

@@ -37,5 +37,5 @@ export async function communicateAsk(question: string){
       chatId: '1',
       message: question,
     }),
-  }).then(res => res.json());
+  }).then(res => res.json()).catch(err => console.log(err));
 }
