@@ -12,7 +12,7 @@ export async function userAsk(question: string) {
   }).then(res => res.json());
 }
 
-export async function directionAsk(question: string){
+export async function directionAsk(question: string) {
   return fetch('https://wskun.club/directionask', {
     method: 'POST',
     headers: {
@@ -26,7 +26,7 @@ export async function directionAsk(question: string){
   }).then(res => res.json());
 }
 
-export async function communicateAsk(question: string){
+export async function communicateAsk(question: string) {
   return fetch('https://wskun.club/normalask', {
     method: 'POST',
     headers: {
@@ -37,5 +37,10 @@ export async function communicateAsk(question: string){
       chatId: '1',
       message: question,
     }),
-  }).then(res => res.json()).catch(err => console.log(err));
+  })
+    .then(res => {
+      console.log('normalask res:', res);
+      res.json();
+    })
+    .catch(err => console.log(err));
 }
