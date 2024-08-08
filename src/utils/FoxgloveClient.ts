@@ -29,7 +29,7 @@ export function myFoxgloveClient() {
   /**
    * init foxglove client & storage channels and services
    */
-  function initClient(socket: WebSocket) {
+  function initClient(socket: WebSocket, fn: any) {
     if (socket.onmessage) {
       console.log('onmessage exists');
     }
@@ -53,9 +53,10 @@ export function myFoxgloveClient() {
     });
     client.on('open', () => {
       console.log('Connected to Foxglove server!');
+      fn();
     });
     client.on('error', e => {
-      console.error(e);
+      console.error('foxgloveClient error:',e);
     });
     client.on('close', () => {
       console.log('Disconnected from Foxglove server!');
@@ -96,6 +97,7 @@ export function myFoxgloveClient() {
     if (!client) {
       return Promise.reject('Client not initialized');
     }
+    console.log(channels.values())
     const channel = _.find(Array.from(channels.values()), {topic});
     if (!channel) {
       return Promise.reject('Channel not found');

@@ -40,7 +40,7 @@ export async function communicateAsk(question: string) {
   })
     .then(res => {
       console.log('normalask res:', res);
-      res.json();
+      return res.json();
     })
     .catch(err => console.log(err));
 }

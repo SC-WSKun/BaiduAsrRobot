@@ -5,7 +5,7 @@ import {useRobotAction} from '../hooks/useRobotAction';
 import baiduAsrController from '../utils/BaiduAsrController';
 import {FoxgloveClient} from '@foxglove/ws-protocol';
 import {myFoxgloveClient} from '../utils/FoxgloveClient';
-import { communicateAsk } from '../hooks/hooks';
+import {communicateAsk} from '../hooks/hooks';
 
 interface IProps {
   foxgloveClient: any;
@@ -14,21 +14,32 @@ interface IProps {
 function RobotContact(props: IProps) {
   const [ws_url, setWsUrl] = useState<string>('');
   const [ws, setWs] = useState<WebSocket | null>(null);
+  const [foxgloveClient, setFoxgloveClient] = useState<any>(null);
 
   const createWs = () => {
-    const ws = new WebSocket('ws://' + ws_url + ':8765');
-    ws.onopen = () => {
-      setWs(ws);
-    };
+    try {
+      const ws = new WebSocket('ws://' + ws_url + ':8765', [
+        FoxgloveClient.SUPPORTED_SUBPROTOCOL,
+      ]);
+      ws.onopen = () => {
+        console.log('ws connected');
+        setWs(ws);
+        let tempFoxgloveClient = myFoxgloveClient();
+        tempFoxgloveClient.initClient(ws, handleTopics);
+        setFoxgloveClient(tempFoxgloveClient);
+      };
+    } catch (error) {
+      console.error('create ws error:', error);
+    }
   };
 
   const handleTopics = () => {
-    const foxgloveClient = myFoxgloveClient();
-    if (ws !== null) foxgloveClient.initClient(ws);
-    else {
-      console.log('ws is null');
-      return;
-    }
+    // const foxgloveClient = myFoxgloveClient();
+    // if (ws !== null) foxgloveClient.initClient(ws);
+    // else {
+    //   console.error('ws is null');
+    //   return;
+    // }
     const {
       startMoving,
       moveToPostion,
@@ -37,7 +48,8 @@ function RobotContact(props: IProps) {
       publicMoveTopic,
       unmountAction,
     } = useRobotAction(foxgloveClient);
-    if (ws.readyState === 1) {
+    if (ws && ws.readyState === 1) {
+      console.log('ws readyState:', ws.readyState);
       publicMoveTopic();
       subscribeTfTopic();
     }
@@ -93,7 +105,9 @@ function RobotContact(props: IProps) {
         />
         <Button
           title="test api"
-          onPress={() => {const res = communicateAsk('你是谁?')}}
+          onPress={() => {
+            const res = communicateAsk('你是谁?');
+          }}
         />
       </View>
     </View>

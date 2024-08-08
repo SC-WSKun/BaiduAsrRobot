@@ -13,7 +13,7 @@ export function useRobotAction(foxgloveClient: any) {
     timestamp,
     data,
   }: MessageData) => {
-    if (subscriptionId === channels.get('tf')) {
+    if (subscriptionId === channels.get('/tf')) {
       const parseData = foxgloveClient.readMsgWithSubId(subscriptionId, data);
       // console.log('parseData:', parseData);
       if (
@@ -50,6 +50,19 @@ export function useRobotAction(foxgloveClient: any) {
       }
     }
   };
+
+  const faceEmotionListener = ({
+    op,
+    subscriptionId,
+    timestamp,
+    data,
+  }: MessageData) => {
+    if (subscriptionId === channels.get('face_emotion')) {
+      const parseData = foxgloveClient.readMsgWithSubId(subscriptionId, data);
+      console.log(parseData);
+    }
+  };
+
   const startMoving = ({angularSpeed, linearSpeed}: Move) => {
     foxgloveClient.publishMessage(channels.get('move'), {
       linear: {x: linearSpeed, y: 0.0, z: 0.0},
@@ -169,28 +182,57 @@ export function useRobotAction(foxgloveClient: any) {
   };
 
   const moveToPostion = (position: TargetPosition) => {
-    if (position === null) {
-      console.log('position param is null');
-    }
-    const {angular, linear} = position;
-    moveToAngular(angular).then(() => {
-      setTimeout(() => {
-        moveToLinear(linear);
-      }, 1500);
+    return new Promise((resolve, reject) => {
+      if (position === null) {
+        console.error('position param is null');
+        resolve(false);
+      }
+      const {angular, linear} = position;
+      moveToAngular(angular).then(() => {
+        setTimeout(() => {
+          moveToLinear(linear).then(() => {
+            resolve(true);
+          });
+        }, 1500);
+      });
     });
   };
 
-  const subscribeTfTopic = () => {
+  const multiMove = (targets: TargetPosition[]) => {
+    if (targets.length === 0) {
+      return;
+    }
+    function loop() {
+      let current_target = targets.shift();
+      current_target &&
+        moveToPostion(current_target).then(() => {
+          if (targets.length > 0) {
+            loop();
+          }
+        });
+    }
+    loop();
+  };
+
+  const subscribeTopic = (topic: string, listener: any) => {
     foxgloveClient
-      .subscribeTopic('/tf')
+      .subscribeTopic(topic)
       .then((subId: number) => {
         console.log(subId);
-        channels.set('tf', subId);
+        channels.set(topic, subId);
       })
       .catch((err: any) => {
         console.log('err:', err);
       });
-    foxgloveClient.listenMessage(carPositionListener);
+    foxgloveClient.listenMessage(listener);
+  };
+
+  const subscribeTfTopic = () => {
+    return subscribeTopic('/tf', carPositionListener);
+  };
+
+  const subscribeEmotionTopic = () => {
+    return subscribeTopic('/face_emotion', faceEmotionListener);
   };
 
   const publicMoveTopic = () => {
@@ -203,7 +245,7 @@ export function useRobotAction(foxgloveClient: any) {
       topic: '/cmd_vel',
     });
     channels.set('move', temp_channelId);
-    baiduAsrController.setAction('move', moveToPostion);
+    baiduAsrController.setAction('move', multiMove);
   };
 
   const unmountAction = () => {
@@ -213,7 +255,9 @@ export function useRobotAction(foxgloveClient: any) {
     startMoving,
     stopMoving,
     moveToPostion,
+    multiMove,
     subscribeTfTopic,
+    subscribeEmotionTopic,
     publicMoveTopic,
     unmountAction,
   };

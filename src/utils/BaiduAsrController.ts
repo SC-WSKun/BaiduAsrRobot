@@ -40,16 +40,14 @@ class BaiduAsrController {
   };
 
   askRobot = async (question: string) => {
+    console.log('ask question:', question);
     let result;
+    // mode: direction, normal
     if (this.mode === 'direction') {
-      console.log('ask direction Question:', question);
       let res = await directionAsk(question);
-      console.log("res: ", res)
       result = res.result;
     } else if (this.mode === 'normal') {
-      console.log('ask communicate Question:', question);
       let res = await communicateAsk(question);
-      console.log("res: ", res)
       result = res.result;
     }
     console.log('robotAnswer:', result);
