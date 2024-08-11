@@ -17,7 +17,7 @@ export function decodeRobotAnswer(type: string) {
     }
     console.log('msg_split:', msg_split);
     switch (type) {
-      case 'move': {
+      case 'direction': {
         try {
           const actionParam_str = msg_split[1].match(/```json([\s\S]*?)```/);
           if (actionParam_str === null) {
@@ -27,6 +27,21 @@ export function decodeRobotAnswer(type: string) {
             actionParam = JSON.parse(actionParam_str[1]);
           }
           console.log('move:', actionParam);
+        } catch (e) {
+          console.log('JSON parse error:', e);
+        }
+        break;
+      }
+      case 'command':{
+        try {
+          const actionParam_str = msg_split[1].match(/```json([\s\S]*?)```/);
+          if (actionParam_str === null) {
+            actionParam = JSON.parse(msg_split[1]);
+            // throw new Error('找不到```json');
+          } else {
+            actionParam = JSON.parse(actionParam_str[1]);
+          }
+          console.log('command:', actionParam);
         } catch (e) {
           console.log('JSON parse error:', e);
         }

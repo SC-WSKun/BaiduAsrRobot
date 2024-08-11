@@ -35,7 +35,7 @@ class BaiduAsrTTS {
   onSynthesizerResult = (
     data: SynthesizerData<SynthesizerResultData | string | undefined>,
   ) => {
-    console.log('onSynthesizerResult', data);
+    // console.log('onSynthesizerResult', data);
   };
 
   /**

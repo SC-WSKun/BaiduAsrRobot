@@ -1,9 +1,10 @@
 import {addRobotEventListener} from './eventBus';
-import {userAsk, directionAsk, communicateAsk} from '../hooks/hooks';
+import {userAsk, directionAsk, communicateAsk, commandAsk, emotionAsk} from '../hooks/hooks';
 import BaiduAsrTTS from './BaiduAsr/BaiduAsrTTS';
 import BaiduAsrWakeup from './BaiduAsr/BaiduAsrWakeup';
 import BaiduAsrRecognization from './BaiduAsr/BaiduAsrRecognization';
 import {decodeRobotAnswer} from './util';
+import { useUserStore } from '../store/userStore';
 
 class BaiduAsrController {
   members: any = {};
@@ -43,20 +44,47 @@ class BaiduAsrController {
     console.log('ask question:', question);
     let result;
     // mode: direction, normal
-    if (this.mode === 'direction') {
-      let res = await directionAsk(question);
-      result = res.result;
-    } else if (this.mode === 'normal') {
-      let res = await communicateAsk(question);
-      result = res.result;
+    switch(this.mode){
+      case 'direction':{
+        let res = await directionAsk(question);
+        result = res.result;
+        break;
+      }
+      case 'normal':{
+        let res = await communicateAsk(question);
+        result = res.result;
+        break;
+      }
+      case 'command':{
+        let res = await commandAsk(question);
+        result = res.result;
+        break;
+      }
+      case 'emotion':{
+        const currentEmotion = useUserStore.getState().emotion;
+        console.log('currentEmotion:', currentEmotion);
+        let res = await emotionAsk(question, currentEmotion);
+        result = res.result;
+        break;
+
+      }
     }
     console.log('robotAnswer:', result);
-    const {speech, actionParam} = decodeRobotAnswer('move')(result);
+    const {speech, actionParam} = decodeRobotAnswer(this.mode)(result);
     console.log('speech', speech);
     console.log('actionParam', actionParam);
-    if (this.mode === 'direction') {
+    switch (this.mode) {
+    case 'direction':{
       this.actions.move(actionParam);
+      break;
     }
+    case 'command':{
+      if (actionParam.command) {
+        this.actions.command(actionParam.command);
+      }
+      break;
+    }
+  }
     if (result.length >= 60) {
       this.members.BaiduAsrTTS.speakLongText(speech);
     } else {

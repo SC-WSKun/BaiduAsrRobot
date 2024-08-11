@@ -5,7 +5,7 @@ import {useRobotAction} from '../hooks/useRobotAction';
 import baiduAsrController from '../utils/BaiduAsrController';
 import {FoxgloveClient} from '@foxglove/ws-protocol';
 import {myFoxgloveClient} from '../utils/FoxgloveClient';
-import {communicateAsk} from '../hooks/hooks';
+import { useUserStore } from '../store/userStore';
 
 interface IProps {
   foxgloveClient: any;
@@ -15,6 +15,17 @@ function RobotContact(props: IProps) {
   const [ws_url, setWsUrl] = useState<string>('');
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [foxgloveClient, setFoxgloveClient] = useState<any>(null);
+  const [robotAction,setRobotAction] = useState<any>(null);
+  const {emotion} = useUserStore();
+
+  useEffect(()=>{
+    // return ()=>{
+    //   const {
+    //     unmountAction
+    //   } = useRobotAction(foxgloveClient);
+    //   unmountAction();
+    // }
+  },[])
 
   const createWs = () => {
     try {
@@ -34,26 +45,21 @@ function RobotContact(props: IProps) {
   };
 
   const handleTopics = () => {
-    // const foxgloveClient = myFoxgloveClient();
-    // if (ws !== null) foxgloveClient.initClient(ws);
-    // else {
-    //   console.error('ws is null');
-    //   return;
-    // }
-    const {
-      startMoving,
-      moveToPostion,
-      stopMoving,
-      subscribeTfTopic,
-      publicMoveTopic,
-      unmountAction,
-    } = useRobotAction(foxgloveClient);
+    const robotAction = useRobotAction(foxgloveClient);
     if (ws && ws.readyState === 1) {
       console.log('ws readyState:', ws.readyState);
-      publicMoveTopic();
-      subscribeTfTopic();
+      robotAction.publicMoveTopic();
+      robotAction.publicTaskTypeTopic();
+      robotAction.publicFaceEmotionTopic();
+      robotAction.subscribeTfTopic();
+      robotAction.subscribeEmotionTopic();
+      setRobotAction(robotAction);
     }
   };
+
+  const test = ()=>{
+     robotAction.publicCommandMessage(0);
+  }
 
   return (
     <View style={{height: 100}}>
@@ -96,18 +102,29 @@ function RobotContact(props: IProps) {
           padding: 5,
         }}>
         <Button
-          title="communicate mode"
-          onPress={() => baiduAsrController.changeMode('normal')}
+          title="聊天模式"
+          onPress={() => {
+            baiduAsrController.changeMode('emotion')
+            robotAction.startfaceRecognization(true);
+          }}
         />
         <Button
-          title="move mode"
+          title="移动模式"
           onPress={() => baiduAsrController.changeMode('direction')}
         />
         <Button
-          title="test api"
+          title="指令模式"
+          onPress={() => baiduAsrController.changeMode('command')}
+        />
+        <Button
+          title="紧急停止"
           onPress={() => {
-            const res = communicateAsk('你是谁?');
+            robotAction.publicCommandMessage(0)
           }}
+        />
+        <Button
+          title="测试"
+          onPress={() => test()}
         />
       </View>
     </View>

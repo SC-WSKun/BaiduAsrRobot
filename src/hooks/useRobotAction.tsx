@@ -2,11 +2,15 @@ import {MessageData} from '@foxglove/ws-protocol';
 import type {Move, Position, TargetPosition} from '../typings/component';
 import baiduAsrController from '../utils/BaiduAsrController';
 import {quaternionToEuler} from '../utils/util';
+import {useUserStore} from '../store/userStore';
 
 export function useRobotAction(foxgloveClient: any) {
+  const emotion = useUserStore.getState().emotion;
+  const updateEmotion = useUserStore.getState().updateEmotion;
   const channels = new Map();
   let odomToBaseFootprint: any = null;
-  let msgLimit = true;
+  let msgLimit = [true, true];
+  // let emotion: string = 'neutral';
   const carPositionListener = ({
     op,
     subscriptionId,
@@ -29,11 +33,11 @@ export function useRobotAction(foxgloveClient: any) {
               transform.child_frame_id === 'base_footprint' &&
               transform.header.frame_id === 'odom',
           )?.transform || odomToBaseFootprint;
-        if (msgLimit) {
-          msgLimit = false;
-          console.log('odomToBaseFootprint:', odomToBaseFootprint);
+        if (msgLimit[0]) {
+          msgLimit[0] = false;
+          // console.log('odomToBaseFootprint:', odomToBaseFootprint);
           setTimeout(() => {
-            msgLimit = true;
+            msgLimit[0] = true;
           }, 1000);
         }
         // this.mapToOdom =
@@ -57,9 +61,23 @@ export function useRobotAction(foxgloveClient: any) {
     timestamp,
     data,
   }: MessageData) => {
-    if (subscriptionId === channels.get('face_emotion')) {
+    if (subscriptionId === channels.get('/face_emotion_result')) {
       const parseData = foxgloveClient.readMsgWithSubId(subscriptionId, data);
-      console.log(parseData);
+      const detectEmotion = parseData.data;
+      if (msgLimit[1]) {
+        msgLimit[1] = false;
+        console.log('detectEmotion:', detectEmotion);
+        setTimeout(() => {
+          msgLimit[1] = true;
+        }, 1000);
+      }
+      if (detectEmotion === 'none') {
+        // emotion = 'neutral';
+        // updateEmotion('neutral');
+      } else {
+        // emotion = detectEmotion;
+        updateEmotion(detectEmotion);
+      }
     }
   };
 
@@ -154,9 +172,15 @@ export function useRobotAction(foxgloveClient: any) {
       const distance = calculateDistance(startPosition, currentPostion);
       const tolerance = 0.1;
       console.log(distance);
-      if (distance < linear) {
+      if (linear > 0 && distance < linear) {
         foxgloveClient.publishMessage(channels.get('move'), {
           linear: {x: 0.3, y: 0.0, z: 0.0},
+          angular: {x: 0.0, y: 0.0, z: 0.0},
+        });
+        return false;
+      } else if (linear < 0 && distance > -1 * linear) {
+        foxgloveClient.publishMessage(channels.get('move'), {
+          linear: {x: -0.3, y: 0.0, z: 0.0},
           angular: {x: 0.0, y: 0.0, z: 0.0},
         });
         return false;
@@ -232,7 +256,7 @@ export function useRobotAction(foxgloveClient: any) {
   };
 
   const subscribeEmotionTopic = () => {
-    return subscribeTopic('/face_emotion', faceEmotionListener);
+    return subscribeTopic('/face_emotion_result', faceEmotionListener);
   };
 
   const publicMoveTopic = () => {
@@ -248,9 +272,48 @@ export function useRobotAction(foxgloveClient: any) {
     baiduAsrController.setAction('move', multiMove);
   };
 
-  const unmountAction = () => {
-    foxgloveClient.unAdvertiseTopic(channels.get('move'));
+  const publicFaceEmotionTopic = () => {
+    const temp_channelId = foxgloveClient.advertiseTopic({
+      encoding: 'cdr',
+      schema: 'bool  data\n',
+      schemaEncoding: 'ros2msg',
+      schemaName: 'std_msgs/msg/Bool',
+      topic: '/enable_emo_reg',
+    });
+    channels.set('enable_emo_reg', temp_channelId);
+    console.log('enable_emo_reg', channels.get('enable_emo_reg'));
   };
+
+  const publicTaskTypeTopic = () => {
+    const temp_channelId = foxgloveClient.advertiseTopic({
+      encoding: 'cdr',
+      schema: 'int32  data\n\n',
+      schemaEncoding: 'ros2msg',
+      schemaName: 'std_msgs/msg/Int32',
+      topic: '/task_type',
+    });
+    channels.set('task_type', temp_channelId);
+    console.log('task_type', channels.get('task_type'));
+    baiduAsrController.setAction('command', publicCommandMessage);
+  };
+
+  const unmountAction = () => {
+    if (foxgloveClient) foxgloveClient.unAdvertiseTopic(channels.get('move'));
+  };
+
+  const startfaceRecognization = (data: boolean) => {
+    foxgloveClient.publishMessage(channels.get('enable_emo_reg'), {data: data});
+  };
+
+  const publicCommandMessage = (data: number) => {
+    console.log('command type:', data);
+    foxgloveClient.publishMessage(channels.get('task_type'), {data: data});
+  };
+
+  const getEmotion = () => {
+    return emotion;
+  }
+
   return {
     startMoving,
     stopMoving,
@@ -259,6 +322,11 @@ export function useRobotAction(foxgloveClient: any) {
     subscribeTfTopic,
     subscribeEmotionTopic,
     publicMoveTopic,
+    publicTaskTypeTopic,
     unmountAction,
+    publicFaceEmotionTopic,
+    startfaceRecognization,
+    publicCommandMessage,
+    getEmotion,
   };
 }

@@ -10,7 +10,6 @@ import React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import HomeScreen from './src/components/HomeScreen';
-import {WsContext} from './src/context';
 
 const Stack = createNativeStackNavigator();
 
@@ -26,13 +25,11 @@ function App(): React.JSX.Element {
   // };
 
   return (
-    // <WsContext.Provider value={{foxgloveClient, ws}}>
       <NavigationContainer>
         <Stack.Navigator>
           <Stack.Screen name="Home" component={HomeScreen} />
         </Stack.Navigator>
       </NavigationContainer>
-    // </WsContext.Provider>
   );
 }
 
