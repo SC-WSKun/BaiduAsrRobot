@@ -54,7 +54,7 @@ export async function communicateAsk(question: string) {
     }),
   })
     .then(res => {
-      console.log('normalask res:', res);
+      console.info('normalask res:', res);
       return res.json();
     })
     .catch(err => console.log(err));
@@ -73,7 +73,7 @@ export async function commandAsk(question: string) {
     }),
   })
     .then(res => {
-      console.log('commandAsk res:', res);
+      console.info('commandAsk res:', res);
       return res.json();
     })
     .catch(err => console.log(err));

@@ -5,7 +5,7 @@ import {useRobotAction} from '../hooks/useRobotAction';
 import baiduAsrController from '../utils/BaiduAsrController';
 import {FoxgloveClient} from '@foxglove/ws-protocol';
 import {myFoxgloveClient} from '../utils/FoxgloveClient';
-import { useUserStore } from '../store/userStore';
+import {useUserStore} from '../store/userStore';
 
 interface IProps {
   foxgloveClient: any;
@@ -15,17 +15,17 @@ function RobotContact(props: IProps) {
   const [ws_url, setWsUrl] = useState<string>('');
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [foxgloveClient, setFoxgloveClient] = useState<any>(null);
-  const [robotAction,setRobotAction] = useState<any>(null);
+  const [robotAction, setRobotAction] = useState<any>(null);
   const {emotion} = useUserStore();
 
-  useEffect(()=>{
+  useEffect(() => {
     // return ()=>{
     //   const {
     //     unmountAction
     //   } = useRobotAction(foxgloveClient);
     //   unmountAction();
     // }
-  },[])
+  }, []);
 
   const createWs = () => {
     try {
@@ -57,9 +57,9 @@ function RobotContact(props: IProps) {
     }
   };
 
-  const test = ()=>{
-     robotAction.publicCommandMessage(0);
-  }
+  const test = () => {
+    robotAction.publicCommandMessage(0);
+  };
 
   return (
     <View style={{height: 100}}>
@@ -104,8 +104,9 @@ function RobotContact(props: IProps) {
         <Button
           title="聊天模式"
           onPress={() => {
-            baiduAsrController.changeMode('emotion')
-            robotAction.startfaceRecognization(true);
+            baiduAsrController.changeMode('normal');
+            // baiduAsrController.changeMode('emotion')
+            // robotAction.startfaceRecognization(true);
           }}
         />
         <Button
@@ -119,13 +120,10 @@ function RobotContact(props: IProps) {
         <Button
           title="紧急停止"
           onPress={() => {
-            robotAction.publicCommandMessage(0)
+            robotAction.publicCommandMessage(0);
           }}
         />
-        <Button
-          title="测试"
-          onPress={() => test()}
-        />
+        <Button title="测试" onPress={() => test()} />
       </View>
     </View>
   );

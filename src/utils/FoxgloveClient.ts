@@ -187,8 +187,8 @@ export function myFoxgloveClient() {
           },
         );
         const reader = new MessageReader(parseResDefinitions);
-        console.log('res.data', response.data);
-        console.log('reader', reader);
+        // console.log('res.data', response.data);
+        // console.log('reader', reader);
 
         const res = reader.readMessage(response.data);
         resolve(res);
