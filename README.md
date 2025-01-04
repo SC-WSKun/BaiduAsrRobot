@@ -21,17 +21,12 @@ Object.assign(global,{
 
 ## 修改 react-native-polyfill-globals 中错误的引用
 1. 找到 `node_modules/react-native-polyfill-globals/index.js`
-2. 更改为下面的代码，将`readable-stream`和`fetch`注释掉，`encoding`一定要保留，其它可以自己试试有没有影响
+2. 修改readable-stream.js代码
     ```js
-    export default () => {
-    [
-        require('./src/base64'),
-        require('./src/encoding'),
-        // require('./src/readable-stream'),
-        require('./src/url'),
-        // require('./src/fetch'),
-        require('./src/crypto'),
-    ].forEach(({ polyfill }) => polyfill());
+    export const polyfill = () => {
+        const { ReadableStream } = require('web-streams-polyfill'); // 这里不需要后面的es6那一串
+
+        polyfillGlobal('ReadableStream', () => ReadableStream);
     };
     ```
 
