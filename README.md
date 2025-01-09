@@ -69,6 +69,12 @@ cd android
 # 打包 aab(Google Play)
 ./gradlew bundleRelease
 ```
+这个主意打包apk的时候要在proguard-rules.pro加入以下代码，安卓混淆编译会导致rtc和语音引擎故障（奇奇怪怪的bug）
+```
+-keep class org.webrtc.** { *; }
+-keep class android.speech.** { *; }
+-keep class com.google.android.speech.** { *; }
+```
 
 
 # 自定义修改
